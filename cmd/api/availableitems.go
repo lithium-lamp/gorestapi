@@ -24,26 +24,17 @@ func (app *application) createAvailableItemHandler(w http.ResponseWriter, r *htt
 		return
 	}
 
+	availableitem := &data.AvailableItem{
+		LongName:      input.LongName,
+		ShortName:     input.ShortName,
+		ItemType:      input.ItemType,
+		Measurement:   input.Measurement,
+		ContainerSize: input.ContainerSize,
+	}
+
 	v := validator.New()
 
-	v.Check(input.LongName != "", "long_name", "must be provided")
-	v.Check(len(input.LongName) <= 500, "long_name", "must not be more than 500 bytes long")
-	//v.Check(validator.Unique(input.LongName), "long_name", "must not contain duplicate values")
-
-	v.Check(input.ShortName != "", "short_name", "must be provided")
-	v.Check(len(input.ShortName) <= 100, "short_name", "must not be more than 100 bytes long")
-
-	v.Check(input.ItemType != 0, "item_type", "must be provided")
-	v.Check(input.ItemType >= 1, "item_type", "must be greater than 0")
-	v.Check(input.ItemType <= 6, "year", "must not be greater than 6") //TEMP VALUE
-
-	v.Check(input.Measurement != 0, "measurement", "must be provided")
-	v.Check(input.Measurement >= 1, "measurement", "must be greater than 0")
-	v.Check(input.Measurement <= 6, "measurement", "must not be greater than 6")
-
-	v.Check(input.ContainerSize >= 0, "container_size", "must be at least 0")
-	v.Check(input.ContainerSize <= 100000, "container_size", "must not be more than 100000 units")
-	if !v.Valid() {
+	if data.ValidateAvailableItem(v, availableitem); !v.Valid() {
 		app.failedValidationResponse(w, r, v.Errors)
 		return
 	}
