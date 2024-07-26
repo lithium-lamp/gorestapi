@@ -5,6 +5,12 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "command": "docker compose up -d && docker exec -it gorestapi-web-1 bash",
+            "name": "compose up and enter shell (background)",
+            "request": "launch",
+            "type": "node-terminal"
+        },
+        {
             "command": "go run ./cmd/api",
             "name": "Run api",
             "request": "launch",
