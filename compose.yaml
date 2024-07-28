@@ -1,5 +1,5 @@
 services:
-  web:
+  restapi:
     build: .
     depends_on:
       db:

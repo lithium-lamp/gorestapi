@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "command": "docker compose up -d && docker exec -it gorestapi-web-1 bash",
+            "command": "docker compose rm -f && docker compose pull && docker compose up -d && docker exec -it gorestapi-restapi-1 bash",
             "name": "compose up and enter shell (background)",
             "request": "launch",
             "type": "node-terminal"
