@@ -10,11 +10,5 @@
             "request": "launch",
             "type": "node-terminal"
         },
-        {
-            "command": "go run ./cmd/api",
-            "name": "Run api",
-            "request": "launch",
-            "type": "node-terminal"
-        }
     ]
 }
