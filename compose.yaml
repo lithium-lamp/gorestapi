@@ -7,6 +7,9 @@ services:
         restart: true
     ports:
       - "8000:4000"
+    networks:
+      backend_net:
+        ipv4_address: ${RESTAPI_HOST}
   db:
     container_name: postgres_container
     image: postgres
@@ -25,6 +28,9 @@ services:
       retries: 5
       start_period: 30s
       timeout: 10s
+    networks:
+      backend_net:
+        ipv4_address: ${DB_HOST}
   pgadmin:
     container_name: pgadmin4_container
     image: dpage/pgadmin4
@@ -36,7 +42,17 @@ services:
       - "5050:80"
     volumes:
       - pgadminvolume:/var/lib/pgadmin
+    networks:
+      backend_net:
+        ipv4_address: ${PGADMIN_HOST}
 
 volumes:
   householdingvolume:
   pgadminvolume:
+
+networks:
+  backend_net:
+    ipam:
+      driver: default
+      config:
+        - subnet: "172.16.238.0/24"
