@@ -1,10 +1,39 @@
 package data
 
 import (
+	"database/sql"
 	"time"
 
+	_ "github.com/lib/pq"
 	"householdingindex.homecatalogue.net/internal/validator"
 )
+
+type AvailableItemModel struct {
+	DB *sql.DB
+}
+
+func (ai AvailableItemModel) Insert(availableitem *AvailableItem) error {
+	query := `
+		INSERT INTO availableitems (long_name, short_name, item_type, measurement, container_size)
+		VALUES ($1, $2, $3, $4, $5)
+		RETURNING id, created_at, expiration_at`
+
+	args := []interface{}{availableitem.LongName, availableitem.ShortName, availableitem.ItemType, availableitem.Measurement, availableitem.ContainerSize}
+
+	return ai.DB.QueryRow(query, args...).Scan(&availableitem.ID, &availableitem.CreatedAt, &availableitem.ExpirationAt)
+}
+
+func (ai AvailableItemModel) Get(id int64) (*AvailableItem, error) {
+	return nil, nil
+}
+
+func (ai AvailableItemModel) Update(availableitem *AvailableItem) error {
+	return nil
+}
+
+func (ai AvailableItemModel) Delete(id int64) error {
+	return nil
+}
 
 type AvailableItem struct {
 	ID            int64       `json:"id"`
