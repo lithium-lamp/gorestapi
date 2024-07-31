@@ -39,21 +39,14 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	DB_HOST := os.Getenv("DB_HOST")
 	DB_PORT, _ := strconv.Atoi(os.Getenv("DB_PORT")) //int format
-	DB_USERNAME := os.Getenv("DB_USERNAME")
-	DB_PASSWORD := os.Getenv("DB_PASSWORD")
-	DB_NAME := os.Getenv("DB_NAME")
 
 	var cfg config
 
 	flag.IntVar(&cfg.port, "port", DB_PORT, "API server port")
 	flag.StringVar(&cfg.env, "env", "development", "Environment (development|staging|production)")
 
-	//ssl mode not fixed
-	dsn := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable", DB_USERNAME, DB_PASSWORD, DB_HOST, DB_NAME)
-
-	flag.StringVar(&cfg.db.dsn, "db-dsn", dsn, "PostgreSQL DSN")
+	flag.StringVar(&cfg.db.dsn, "db-dsn", os.Getenv("DB_DSN"), "PostgreSQL DSN")
 
 	flag.IntVar(&cfg.db.maxOpenConns, "db-max-open-conns", 25, "PostgreSQL max open connections")
 	flag.IntVar(&cfg.db.maxIdleConns, "db-max-idle-conns", 25, "PostgreSQL max idle connections")

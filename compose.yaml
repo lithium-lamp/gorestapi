@@ -1,36 +1,37 @@
 services:
-  restapi:
-    build: .
-    depends_on:
-      db:
-        condition: service_healthy
-        restart: true
-    ports:
-      - "8000:4000"
-    networks:
-      backend_net:
-        ipv4_address: ${RESTAPI_HOST}
+  #restapi:
+  #  build: .
+  #  depends_on:
+  #    db:
+  #      condition: service_healthy
+  #      restart: true
+  #  ports:
+  #    - "8000:4000"
+  #  networks:
+  #    proxy_net:
+  #    backend_net:
+  #      ipv4_address: ${RESTAPI_HOST}
   db:
     container_name: postgres_container
     image: postgres
     restart: always
     ports:
-      - "5432:5432"
+      - "6543:5432"
     environment:
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
     volumes:
-      - householdingvolume:/var/lib/postgresql
+      - householdingvolume:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_NAME}"]
       interval: 10s
       retries: 5
       start_period: 30s
       timeout: 10s
-    networks:
-      backend_net:
-        ipv4_address: ${DB_HOST}
+    #networks:
+    #  backend_net:
+    #    ipv4_address: ${DB_HOST}
   pgadmin:
     container_name: pgadmin4_container
     image: dpage/pgadmin4
@@ -42,17 +43,21 @@ services:
       - "5050:80"
     volumes:
       - pgadminvolume:/var/lib/pgadmin
-    networks:
-      backend_net:
-        ipv4_address: ${PGADMIN_HOST}
+    depends_on:
+    - db
+    #networks:
+    #  backend_net:
+    #    ipv4_address: ${PGADMIN_HOST}
+
+#networks:
+  #proxy_net:
+  #  external: true
+  #backend_net:
+  #  ipam:
+  #    driver: default
+  #    config:
+  #      - subnet: "172.16.238.0/24"
 
 volumes:
   householdingvolume:
   pgadminvolume:
-
-networks:
-  backend_net:
-    ipam:
-      driver: default
-      config:
-        - subnet: "172.16.238.0/24"

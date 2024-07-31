@@ -9,8 +9,6 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -o /creategorestapi ./cmd/api
-
-EXPOSE 4000
+RUN go build --no-cache -o /creategorestapi ./cmd/api
 
 CMD [ "/creategorestapi" ]

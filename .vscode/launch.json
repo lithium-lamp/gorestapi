@@ -5,8 +5,14 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "command": "docker compose rm -f && docker compose pull && docker compose up -d && docker exec -it gorestapi-restapi-1 bash",
-            "name": "compose up and enter shell (background)",
+            "command": "docker compose rm -f && docker compose pull && docker compose up -d",
+            "name": "compose up",
+            "request": "launch",
+            "type": "node-terminal"
+        },
+        {
+            "command": "go run ./cmd/api",
+            "name": "start rest api",
             "request": "launch",
             "type": "node-terminal"
         },
