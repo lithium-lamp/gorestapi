@@ -2,6 +2,7 @@ package data
 
 import (
 	"database/sql"
+	"errors"
 	"time"
 
 	_ "github.com/lib/pq"
@@ -24,14 +25,82 @@ func (ai AvailableItemModel) Insert(availableitem *AvailableItem) error {
 }
 
 func (ai AvailableItemModel) Get(id int64) (*AvailableItem, error) {
-	return nil, nil
+	if id < 1 {
+		return nil, ErrRecordNotFound
+	}
+
+	query := `
+		SELECT id, created_at, expiration_at, long_name, short_name, item_type, measurement, container_size
+		FROM availableitems
+		WHERE id = $1`
+
+	var availableitem AvailableItem
+
+	err := ai.DB.QueryRow(query, id).Scan(
+		&availableitem.ID,
+		&availableitem.CreatedAt,
+		&availableitem.ExpirationAt,
+		&availableitem.LongName,
+		&availableitem.ShortName,
+		&availableitem.ItemType,
+		&availableitem.Measurement,
+		&availableitem.ContainerSize,
+	)
+
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrRecordNotFound
+		default:
+			return nil, err
+		}
+	}
+
+	return &availableitem, nil
 }
 
 func (ai AvailableItemModel) Update(availableitem *AvailableItem) error {
-	return nil
+	query := `
+		UPDATE availableitems
+		SET expiration_at = $1, long_name = $2, short_name = $3, item_type = $4, measurement = $5, container_size = $6
+		WHERE id = $7
+		RETURNING id`
+
+	args := []interface{}{
+		availableitem.ExpirationAt,
+		availableitem.LongName,
+		availableitem.ShortName,
+		availableitem.ItemType,
+		availableitem.Measurement,
+		availableitem.ContainerSize,
+		availableitem.ID,
+	}
+
+	return ai.DB.QueryRow(query, args...).Scan(&availableitem.ID)
 }
 
 func (ai AvailableItemModel) Delete(id int64) error {
+	if id < 1 {
+		return ErrRecordNotFound
+	}
+
+	query := `
+		DELETE FROM availableitems WHERE id = $1`
+
+	result, err := ai.DB.Exec(query, id)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return ErrRecordNotFound
+	}
+
 	return nil
 }
 

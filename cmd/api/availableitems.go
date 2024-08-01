@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
@@ -11,6 +12,7 @@ import (
 
 func (app *application) createAvailableItemHandler(w http.ResponseWriter, r *http.Request) {
 	var input struct {
+		ExpirationAt  time.Time        `json:"expiration_at"`
 		LongName      string           `json:"long_name"`
 		ShortName     string           `json:"short_name"`
 		ItemType      data.ItemType    `json:"item_type"`
@@ -25,6 +27,7 @@ func (app *application) createAvailableItemHandler(w http.ResponseWriter, r *htt
 	}
 
 	availableitem := &data.AvailableItem{
+		ExpirationAt:  input.ExpirationAt,
 		LongName:      input.LongName,
 		ShortName:     input.ShortName,
 		ItemType:      input.ItemType,
@@ -61,18 +64,101 @@ func (app *application) showAvailableItemHandler(w http.ResponseWriter, r *http.
 		return
 	}
 
-	availableitem := data.AvailableItem{
-		ID:            id,
-		CreatedAt:     time.Now(),
-		ExpirationAt:  time.Now().Add(time.Hour * 24 * 2),
-		LongName:      "Isbergssallad Ca 440g Klass 1",
-		ShortName:     "Isbergssallad",
-		ItemType:      1,
-		Measurement:   2,
-		ContainerSize: 440,
+	availableitem, err := app.models.AvailableItems.Get(id)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
 	}
 
 	err = app.writeJSON(w, http.StatusOK, envelope{"availableitem": availableitem}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+}
+
+func (app *application) updateAvailableItemHandler(w http.ResponseWriter, r *http.Request) {
+	id, err := app.readIDParam(r)
+	if err != nil {
+		app.notFoundResponse(w, r)
+		return
+	}
+
+	availableitem, err := app.models.AvailableItems.Get(id)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+
+	var input struct {
+		ExpirationAt  time.Time        `json:"expiration_at"`
+		LongName      string           `json:"long_name"`
+		ShortName     string           `json:"short_name"`
+		ItemType      data.ItemType    `json:"item_type"`
+		Measurement   data.Measurement `json:"measurement"`
+		ContainerSize int32            `json:"container_size"`
+	}
+
+	err = app.readJSON(w, r, &input)
+	if err != nil {
+		app.badRequestResponse(w, r, err)
+		return
+	}
+
+	availableitem.ExpirationAt = input.ExpirationAt
+	availableitem.LongName = input.LongName
+	availableitem.ShortName = input.ShortName
+	availableitem.ItemType = input.ItemType
+	availableitem.Measurement = input.Measurement
+	availableitem.ContainerSize = input.ContainerSize
+
+	v := validator.New()
+
+	if data.ValidateAvailableItem(v, availableitem); !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+
+	err = app.models.AvailableItems.Update(availableitem)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"availableitem": availableitem}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+}
+
+func (app *application) deleteAvailableItemHandler(w http.ResponseWriter, r *http.Request) {
+	id, err := app.readIDParam(r)
+	if err != nil {
+		app.notFoundResponse(w, r)
+		return
+	}
+
+	err = app.models.AvailableItems.Delete(id)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"message": "available item successfully deleted"}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}

@@ -5,8 +5,8 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "command": "docker compose rm -f && docker compose pull && docker compose up -d",
-            "name": "compose up",
+            "command": "docker compose rm -f && docker compose pull && docker compose up -d && clear && printf 'All done!\n\nEnter `psql -h localhost -p 5432 -d householdingindex -U admin` to start\n' && docker exec -it postgres_container sh",
+            "name": "compose up and enter postgres shell",
             "request": "launch",
             "type": "node-terminal"
         },
