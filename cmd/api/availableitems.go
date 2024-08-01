@@ -100,12 +100,12 @@ func (app *application) updateAvailableItemHandler(w http.ResponseWriter, r *htt
 	}
 
 	var input struct {
-		ExpirationAt  time.Time        `json:"expiration_at"`
-		LongName      string           `json:"long_name"`
-		ShortName     string           `json:"short_name"`
-		ItemType      data.ItemType    `json:"item_type"`
-		Measurement   data.Measurement `json:"measurement"`
-		ContainerSize int32            `json:"container_size"`
+		ExpirationAt  *time.Time        `json:"expiration_at"`
+		LongName      *string           `json:"long_name"`
+		ShortName     *string           `json:"short_name"`
+		ItemType      *data.ItemType    `json:"item_type"`
+		Measurement   *data.Measurement `json:"measurement"`
+		ContainerSize *int32            `json:"container_size"`
 	}
 
 	err = app.readJSON(w, r, &input)
@@ -114,12 +114,29 @@ func (app *application) updateAvailableItemHandler(w http.ResponseWriter, r *htt
 		return
 	}
 
-	availableitem.ExpirationAt = input.ExpirationAt
-	availableitem.LongName = input.LongName
-	availableitem.ShortName = input.ShortName
-	availableitem.ItemType = input.ItemType
-	availableitem.Measurement = input.Measurement
-	availableitem.ContainerSize = input.ContainerSize
+	if input.ExpirationAt != nil {
+		availableitem.ExpirationAt = *input.ExpirationAt
+	}
+
+	if input.LongName != nil {
+		availableitem.LongName = *input.LongName
+	}
+
+	if input.ShortName != nil {
+		availableitem.ShortName = *input.ShortName
+	}
+
+	if input.ItemType != nil {
+		availableitem.ItemType = *input.ItemType
+	}
+
+	if input.Measurement != nil {
+		availableitem.Measurement = *input.Measurement
+	}
+
+	if input.ContainerSize != nil {
+		availableitem.ContainerSize = *input.ContainerSize
+	}
 
 	v := validator.New()
 
