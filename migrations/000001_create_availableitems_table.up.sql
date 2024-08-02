@@ -6,5 +6,6 @@ CREATE TABLE IF NOT EXISTS availableitems (
     short_name text NOT NULL,
     item_type int NOT NULL,
     measurement int NOT NULL,
-    container_size int NOT NULL
+    container_size int NOT NULL,
+    version integer NOT NULL DEFAULT 1
 );

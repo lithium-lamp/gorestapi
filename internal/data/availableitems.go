@@ -1,6 +1,7 @@
 package data
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"time"
@@ -15,13 +16,16 @@ type AvailableItemModel struct {
 
 func (ai AvailableItemModel) Insert(availableitem *AvailableItem) error {
 	query := `
-		INSERT INTO availableitems (long_name, short_name, item_type, measurement, container_size)
+		INSERT INTO availableitems (expiration_at, long_name, short_name, item_type, measurement, container_size)
 		VALUES ($1, $2, $3, $4, $5)
-		RETURNING id, created_at, expiration_at`
+		RETURNING id, created_at, version`
 
-	args := []interface{}{availableitem.LongName, availableitem.ShortName, availableitem.ItemType, availableitem.Measurement, availableitem.ContainerSize}
+	args := []interface{}{availableitem.ExpirationAt, availableitem.LongName, availableitem.ShortName, availableitem.ItemType, availableitem.Measurement, availableitem.ContainerSize}
 
-	return ai.DB.QueryRow(query, args...).Scan(&availableitem.ID, &availableitem.CreatedAt, &availableitem.ExpirationAt)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	return ai.DB.QueryRowContext(ctx, query, args...).Scan(&availableitem.ID, &availableitem.CreatedAt, &availableitem.Version)
 }
 
 func (ai AvailableItemModel) Get(id int64) (*AvailableItem, error) {
@@ -30,13 +34,17 @@ func (ai AvailableItemModel) Get(id int64) (*AvailableItem, error) {
 	}
 
 	query := `
-		SELECT id, created_at, expiration_at, long_name, short_name, item_type, measurement, container_size
+		SELECT id, created_at, expiration_at, long_name, short_name, item_type, measurement, container_size, version
 		FROM availableitems
 		WHERE id = $1`
 
 	var availableitem AvailableItem
 
-	err := ai.DB.QueryRow(query, id).Scan(
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+
+	defer cancel()
+
+	err := ai.DB.QueryRowContext(ctx, query, id).Scan(
 		&availableitem.ID,
 		&availableitem.CreatedAt,
 		&availableitem.ExpirationAt,
@@ -45,6 +53,7 @@ func (ai AvailableItemModel) Get(id int64) (*AvailableItem, error) {
 		&availableitem.ItemType,
 		&availableitem.Measurement,
 		&availableitem.ContainerSize,
+		&availableitem.Version,
 	)
 
 	if err != nil {
@@ -59,12 +68,59 @@ func (ai AvailableItemModel) Get(id int64) (*AvailableItem, error) {
 	return &availableitem, nil
 }
 
+func (m AvailableItemModel) GetAll(expirationat time.Time, longname string, shortname string, itemtype ItemType, measurement Measurement, containersize int, filters Filters) ([]*AvailableItem, error) {
+	query := `
+		SELECT id, created_at, expiration_at, long_name, short_name, item_type, measurement, container_size, version
+		FROM availableitems
+		ORDER BY id`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	rows, err := m.DB.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	availableitems := []*AvailableItem{}
+
+	for rows.Next() {
+		var availableitem AvailableItem
+
+		err := rows.Scan(
+			&availableitem.ID,
+			&availableitem.CreatedAt,
+			&availableitem.ExpirationAt,
+			&availableitem.LongName,
+			&availableitem.ShortName,
+			&availableitem.ItemType,
+			&availableitem.Measurement,
+			&availableitem.ContainerSize,
+			&availableitem.Version,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+
+		availableitems = append(availableitems, &availableitem)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return availableitems, nil
+}
+
 func (ai AvailableItemModel) Update(availableitem *AvailableItem) error {
 	query := `
 		UPDATE availableitems
-		SET expiration_at = $1, long_name = $2, short_name = $3, item_type = $4, measurement = $5, container_size = $6
-		WHERE id = $7
-		RETURNING id`
+		SET expiration_at = $1, long_name = $2, short_name = $3, item_type = $4, measurement = $5, container_size = $6, version = version + 1
+		WHERE id = $7 AND version = $8
+		RETURNING version`
 
 	args := []interface{}{
 		availableitem.ExpirationAt,
@@ -74,9 +130,23 @@ func (ai AvailableItemModel) Update(availableitem *AvailableItem) error {
 		availableitem.Measurement,
 		availableitem.ContainerSize,
 		availableitem.ID,
+		availableitem.Version,
 	}
 
-	return ai.DB.QueryRow(query, args...).Scan(&availableitem.ID)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	err := ai.DB.QueryRowContext(ctx, query, args...).Scan(&availableitem.Version)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return ErrEditConflict
+		default:
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (ai AvailableItemModel) Delete(id int64) error {
@@ -85,9 +155,13 @@ func (ai AvailableItemModel) Delete(id int64) error {
 	}
 
 	query := `
-		DELETE FROM availableitems WHERE id = $1`
+		DELETE FROM availableitems
+		WHERE id = $1`
 
-	result, err := ai.DB.Exec(query, id)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	result, err := ai.DB.ExecContext(ctx, query, id)
 	if err != nil {
 		return err
 	}
@@ -113,6 +187,7 @@ type AvailableItem struct {
 	ItemType      ItemType    `json:"item_type"`
 	Measurement   Measurement `json:"measurement"`
 	ContainerSize int32       `json:"container_size"`
+	Version       int32       `json:"version"`
 }
 
 func ValidateAvailableItem(v *validator.Validator, availableitem *AvailableItem) {

@@ -147,7 +147,12 @@ func (app *application) updateAvailableItemHandler(w http.ResponseWriter, r *htt
 
 	err = app.models.AvailableItems.Update(availableitem)
 	if err != nil {
-		app.serverErrorResponse(w, r, err)
+		switch {
+		case errors.Is(err, data.ErrEditConflict):
+			app.editConflictResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
 		return
 	}
 
@@ -179,4 +184,51 @@ func (app *application) deleteAvailableItemHandler(w http.ResponseWriter, r *htt
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
+}
+
+func (app *application) listAvailableItemsHandler(w http.ResponseWriter, r *http.Request) {
+	var input struct {
+		ExpirationAt  time.Time
+		LongName      string
+		ShortName     string
+		ItemType      data.ItemType
+		Measurement   data.Measurement
+		ContainerSize int
+		data.Filters
+	}
+
+	v := validator.New()
+
+	qs := r.URL.Query()
+
+	input.ExpirationAt = app.readTime(qs, "expiration_at", time.Time{}, v)
+	input.LongName = app.readString(qs, "long_name", "")
+	input.ShortName = app.readString(qs, "short_name", "")
+	input.ItemType = data.ItemType(app.readInt(qs, "item_type", 1, v))
+	input.Measurement = data.Measurement(app.readInt(qs, "measurement", 1, v))
+	input.ContainerSize = app.readInt(qs, "container_size", 1, v)
+
+	input.Filters.Page = app.readInt(qs, "page", 1, v)
+	input.Filters.PageSize = app.readInt(qs, "page_size", 20, v)
+
+	input.Filters.Sort = app.readString(qs, "sort", "id")
+
+	input.Filters.SortSafelist = []string{"id", "expiration_at", "long_name", "short_name", "item_type", "measurement", "container_size", "-id", "-expiration_at", "-long_name", "-short_name", "-item_type", "-measurement", "-container_size"}
+
+	if data.ValidateFilters(v, input.Filters); !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+
+	availableitems, err := app.models.AvailableItems.GetAll(input.ExpirationAt, input.LongName, input.ShortName, input.ItemType, input.Measurement, input.ContainerSize, input.Filters)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"availableitems": availableitems}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+
 }
