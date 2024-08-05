@@ -143,12 +143,14 @@ func (app *application) readTime(qs url.Values, key string, defaultValue time.Ti
 		return defaultValue
 	}
 
-	t, err := time.Parse(time.DateTime, s)
+	t, err := time.Parse(time.RFC3339, s)
 
 	if err != nil {
 		v.AddError(key, "must be a time value")
 		return defaultValue
 	}
+
+	fmt.Println(t)
 
 	return t
 }

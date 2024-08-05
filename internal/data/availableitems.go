@@ -17,7 +17,7 @@ type AvailableItemModel struct {
 func (ai AvailableItemModel) Insert(availableitem *AvailableItem) error {
 	query := `
 		INSERT INTO availableitems (expiration_at, long_name, short_name, item_type, measurement, container_size)
-		VALUES ($1, $2, $3, $4, $5)
+		VALUES ($1, $2, $3, $4, $5, $6)
 		RETURNING id, created_at, version`
 
 	args := []interface{}{availableitem.ExpirationAt, availableitem.LongName, availableitem.ShortName, availableitem.ItemType, availableitem.Measurement, availableitem.ContainerSize}
@@ -68,16 +68,22 @@ func (ai AvailableItemModel) Get(id int64) (*AvailableItem, error) {
 	return &availableitem, nil
 }
 
-func (m AvailableItemModel) GetAll(expirationat time.Time, longname string, shortname string, itemtype ItemType, measurement Measurement, containersize int, filters Filters) ([]*AvailableItem, error) {
+func (ai AvailableItemModel) GetAll(expirationat time.Time, longname string, shortname string, itemtype ItemType, measurement Measurement, containersize int, filters Filters) ([]*AvailableItem, error) {
 	query := `
 		SELECT id, created_at, expiration_at, long_name, short_name, item_type, measurement, container_size, version
 		FROM availableitems
+		WHERE (expiration_at = $1 OR $1 = '0001-01-01T00:00:00Z')
+		AND (to_tsvector('simple', long_name) @@ plainto_tsquery('simple', $2) OR $2 = '')
+		AND (STRPOS(LOWER(short_name), LOWER($3)) > 0 OR $3 = '')
+		AND (item_type = $4 OR $4 = 0)
+		AND (measurement = $5 OR $5 = 0)
+		AND (container_size = $6 OR $6 = 0)
 		ORDER BY id`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	rows, err := m.DB.QueryContext(ctx, query)
+	rows, err := ai.DB.QueryContext(ctx, query, expirationat, longname, shortname, itemtype, measurement, containersize)
 	if err != nil {
 		return nil, err
 	}
