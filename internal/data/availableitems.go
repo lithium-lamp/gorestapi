@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"time"
 
 	_ "github.com/lib/pq"
@@ -68,9 +69,9 @@ func (ai AvailableItemModel) Get(id int64) (*AvailableItem, error) {
 	return &availableitem, nil
 }
 
-func (ai AvailableItemModel) GetAll(expirationat time.Time, longname string, shortname string, itemtype ItemType, measurement Measurement, containersize int, filters Filters) ([]*AvailableItem, error) {
-	query := `
-		SELECT id, created_at, expiration_at, long_name, short_name, item_type, measurement, container_size, version
+func (ai AvailableItemModel) GetAll(expirationat time.Time, longname string, shortname string, itemtype ItemType, measurement Measurement, containersize int, filters Filters) ([]*AvailableItem, Metadata, error) {
+	query := fmt.Sprintf(`
+		SELECT count(*) OVER(), id, created_at, expiration_at, long_name, short_name, item_type, measurement, container_size, version
 		FROM availableitems
 		WHERE (expiration_at = $1 OR $1 = '0001-01-01T00:00:00Z')
 		AND (to_tsvector('simple', long_name) @@ plainto_tsquery('simple', $2) OR $2 = '')
@@ -78,24 +79,29 @@ func (ai AvailableItemModel) GetAll(expirationat time.Time, longname string, sho
 		AND (item_type = $4 OR $4 = 0)
 		AND (measurement = $5 OR $5 = 0)
 		AND (container_size = $6 OR $6 = 0)
-		ORDER BY id`
+		ORDER BY %s %s, id ASC
+		LIMIT $7 OFFSET $8`, filters.sortColumn(), filters.sortDirection())
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	rows, err := ai.DB.QueryContext(ctx, query, expirationat, longname, shortname, itemtype, measurement, containersize)
+	args := []interface{}{expirationat, longname, shortname, itemtype, measurement, containersize, filters.limit(), filters.offset()}
+
+	rows, err := ai.DB.QueryContext(ctx, query, args...)
 	if err != nil {
-		return nil, err
+		return nil, Metadata{}, err
 	}
 
 	defer rows.Close()
 
+	totalRecords := 0
 	availableitems := []*AvailableItem{}
 
 	for rows.Next() {
 		var availableitem AvailableItem
 
 		err := rows.Scan(
+			&totalRecords,
 			&availableitem.ID,
 			&availableitem.CreatedAt,
 			&availableitem.ExpirationAt,
@@ -108,17 +114,19 @@ func (ai AvailableItemModel) GetAll(expirationat time.Time, longname string, sho
 		)
 
 		if err != nil {
-			return nil, err
+			return nil, Metadata{}, err
 		}
 
 		availableitems = append(availableitems, &availableitem)
 	}
 
 	if err = rows.Err(); err != nil {
-		return nil, err
+		return nil, Metadata{}, err
 	}
 
-	return availableitems, nil
+	metadata := calculateMetadata(totalRecords, filters.Page, filters.PageSize)
+
+	return availableitems, metadata, nil
 }
 
 func (ai AvailableItemModel) Update(availableitem *AvailableItem) error {

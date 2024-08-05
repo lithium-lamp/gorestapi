@@ -220,13 +220,13 @@ func (app *application) listAvailableItemsHandler(w http.ResponseWriter, r *http
 		return
 	}
 
-	availableitems, err := app.models.AvailableItems.GetAll(input.ExpirationAt, input.LongName, input.ShortName, input.ItemType, input.Measurement, input.ContainerSize, input.Filters)
+	availableitems, metadata, err := app.models.AvailableItems.GetAll(input.ExpirationAt, input.LongName, input.ShortName, input.ItemType, input.Measurement, input.ContainerSize, input.Filters)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
 	}
 
-	err = app.writeJSON(w, http.StatusOK, envelope{"availableitems": availableitems}, nil)
+	err = app.writeJSON(w, http.StatusOK, envelope{"availableitems": availableitems, "metadata": metadata}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
