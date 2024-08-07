@@ -2,4 +2,4 @@ Icon?
 ![iI]con[_a-zA-Z0-9]
 .env
 commands.txt
-sampledata.json
+populate_database.sh

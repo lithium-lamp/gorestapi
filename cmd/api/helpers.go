@@ -150,7 +150,5 @@ func (app *application) readTime(qs url.Values, key string, defaultValue time.Ti
 		return defaultValue
 	}
 
-	fmt.Println(t)
-
 	return t
 }

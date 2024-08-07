@@ -70,10 +70,11 @@ func (ai AvailableItemModel) Get(id int64) (*AvailableItem, error) {
 }
 
 func (ai AvailableItemModel) GetAll(expirationat time.Time, longname string, shortname string, itemtype ItemType, measurement Measurement, containersize int, filters Filters) ([]*AvailableItem, Metadata, error) {
+	//expiration_at currently retrieves items larger than the input ====> search for items that are still fresh according to current date
 	query := fmt.Sprintf(`
 		SELECT count(*) OVER(), id, created_at, expiration_at, long_name, short_name, item_type, measurement, container_size, version
 		FROM availableitems
-		WHERE (expiration_at = $1 OR $1 = '0001-01-01T00:00:00Z')
+		WHERE (expiration_at >= $1 OR $1 = '0001-01-01T00:00:00Z')
 		AND (to_tsvector('simple', long_name) @@ plainto_tsquery('simple', $2) OR $2 = '')
 		AND (STRPOS(LOWER(short_name), LOWER($3)) > 0 OR $3 = '')
 		AND (item_type = $4 OR $4 = 0)
@@ -85,7 +86,7 @@ func (ai AvailableItemModel) GetAll(expirationat time.Time, longname string, sho
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	args := []interface{}{expirationat, longname, shortname, itemtype, measurement, containersize, filters.limit(), filters.offset()}
+	args := []interface{}{expirationat.Format(time.RFC3339), longname, shortname, itemtype, measurement, containersize, filters.limit(), filters.offset()}
 
 	rows, err := ai.DB.QueryContext(ctx, query, args...)
 	if err != nil {

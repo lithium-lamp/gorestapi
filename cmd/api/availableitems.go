@@ -204,9 +204,9 @@ func (app *application) listAvailableItemsHandler(w http.ResponseWriter, r *http
 	input.ExpirationAt = app.readTime(qs, "expiration_at", time.Time{}, v)
 	input.LongName = app.readString(qs, "long_name", "")
 	input.ShortName = app.readString(qs, "short_name", "")
-	input.ItemType = data.ItemType(app.readInt(qs, "item_type", 1, v))
-	input.Measurement = data.Measurement(app.readInt(qs, "measurement", 1, v))
-	input.ContainerSize = app.readInt(qs, "container_size", 1, v)
+	input.ItemType = data.ItemType(app.readInt(qs, "item_type", 0, v))
+	input.Measurement = data.Measurement(app.readInt(qs, "measurement", 0, v))
+	input.ContainerSize = app.readInt(qs, "container_size", 0, v)
 
 	input.Filters.Page = app.readInt(qs, "page", 1, v)
 	input.Filters.PageSize = app.readInt(qs, "page_size", 20, v)
