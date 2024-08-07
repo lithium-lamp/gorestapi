@@ -7,10 +7,12 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"sync"
 	"time"
 
 	"householdingindex.homecatalogue.net/internal/data"
 	"householdingindex.homecatalogue.net/internal/jsonlog"
+	"householdingindex.homecatalogue.net/internal/mailer"
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -27,11 +29,17 @@ type config struct {
 		maxIdleConns int
 		maxIdleTime  string
 	}
-
 	limiter struct {
+		enabled bool
 		rps     float64
 		burst   int
-		enabled bool
+	}
+	smtp struct {
+		host     string
+		port     int
+		username string
+		password string
+		sender   string
 	}
 }
 
@@ -39,6 +47,8 @@ type application struct {
 	config config
 	logger *jsonlog.Logger
 	models data.Models
+	mailer mailer.Mailer
+	wg     sync.WaitGroup
 }
 
 func main() {
@@ -47,9 +57,9 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	DB_PORT, _ := strconv.Atoi(os.Getenv("DB_PORT")) //int format
-
 	var cfg config
+
+	DB_PORT, _ := strconv.Atoi(os.Getenv("DB_PORT")) //int format
 
 	flag.IntVar(&cfg.port, "port", DB_PORT, "API server port")
 	flag.StringVar(&cfg.env, "env", "development", "Environment (development|staging|production)")
@@ -63,6 +73,14 @@ func main() {
 	flag.Float64Var(&cfg.limiter.rps, "limiter-rps", 2, "Rate limiter maximum requests per second")
 	flag.IntVar(&cfg.limiter.burst, "limiter-burst", 4, "Rate limiter maximum burst")
 	flag.BoolVar(&cfg.limiter.enabled, "limiter-enabled", true, "Enable rate limiter")
+
+	SMTP_PORT, _ := strconv.Atoi(os.Getenv("SMTP_PORT")) //int format
+
+	flag.StringVar(&cfg.smtp.host, "smtp-host", os.Getenv("SMTP_HOST"), "SMTP host")
+	flag.IntVar(&cfg.smtp.port, "smtp-port", SMTP_PORT, "SMTP port")
+	flag.StringVar(&cfg.smtp.username, "smtp-username", os.Getenv("SMTP_USERNAME"), "SMTP username")
+	flag.StringVar(&cfg.smtp.password, "smtp-password", os.Getenv("SMTP_PASSWORD"), "SMTP password")
+	flag.StringVar(&cfg.smtp.sender, "smtp-sender", os.Getenv("SMTP_SENDER"), "SMTP sender")
 
 	flag.Parse()
 
@@ -81,6 +99,7 @@ func main() {
 		config: cfg,
 		logger: logger,
 		models: data.NewModels(db),
+		mailer: mailer.New(cfg.smtp.host, cfg.smtp.port, cfg.smtp.username, cfg.smtp.password, cfg.smtp.sender),
 	}
 
 	err = app.serve()
