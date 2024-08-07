@@ -11,8 +11,14 @@
             "type": "node-terminal"
         },
         {
-            "command": "go run ./cmd/api",
-            "name": "start rest api",
+            "command": "go run ./cmd/api -limiter-enabled=false",
+            "name": "start rest api (no limiter)",
+            "request": "launch",
+            "type": "node-terminal"
+        },
+        {
+            "command": "go run ./cmd/api/ -limiter-burst=2",
+            "name": "start rest api (burst 2 limiter)",
             "request": "launch",
             "type": "node-terminal"
         },
