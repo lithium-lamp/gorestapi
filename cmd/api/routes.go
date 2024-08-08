@@ -13,13 +13,18 @@ func (app *application) routes() http.Handler {
 	router.MethodNotAllowed = http.HandlerFunc(app.methodNotAllowedResponse)
 
 	router.HandlerFunc(http.MethodGet, "/v1/healthcheck", app.healthcheckHandler)
-	router.HandlerFunc(http.MethodGet, "/v1/availableitems", app.listAvailableItemsHandler)
-	router.HandlerFunc(http.MethodPost, "/v1/availableitems", app.createAvailableItemHandler)
-	router.HandlerFunc(http.MethodGet, "/v1/availableitems/:id", app.showAvailableItemHandler)
-	router.HandlerFunc(http.MethodPatch, "/v1/availableitems/:id", app.updateAvailableItemHandler)
-	router.HandlerFunc(http.MethodDelete, "/v1/availableitems/:id", app.deleteAvailableItemHandler)
+
+	router.HandlerFunc(http.MethodGet, "/v1/availableitems", app.requireActivatedUser(app.listAvailableItemsHandler))
+	router.HandlerFunc(http.MethodPost, "/v1/availableitems", app.requireActivatedUser(app.createAvailableItemHandler))
+	router.HandlerFunc(http.MethodGet, "/v1/availableitems/:id", app.requireActivatedUser(app.showAvailableItemHandler))
+	router.HandlerFunc(http.MethodPatch, "/v1/availableitems/:id", app.requireActivatedUser(app.updateAvailableItemHandler))
+	router.HandlerFunc(http.MethodDelete, "/v1/availableitems/:id", app.requireActivatedUser(app.deleteAvailableItemHandler))
 
 	router.HandlerFunc(http.MethodPost, "/v1/users", app.registerUserHandler)
 
-	return app.recoverPanic(app.rateLimit(router))
+	router.HandlerFunc(http.MethodPut, "/v1/users/activated", app.activateUserHandler)
+
+	router.HandlerFunc(http.MethodPost, "/v1/tokens/authentication", app.createAuthenticationTokenHandler)
+
+	return app.recoverPanic(app.rateLimit(app.authenticate(router)))
 }
