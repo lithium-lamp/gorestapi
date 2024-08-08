@@ -14,11 +14,11 @@ func (app *application) routes() http.Handler {
 
 	router.HandlerFunc(http.MethodGet, "/v1/healthcheck", app.healthcheckHandler)
 
-	router.HandlerFunc(http.MethodGet, "/v1/availableitems", app.requireActivatedUser(app.listAvailableItemsHandler))
-	router.HandlerFunc(http.MethodPost, "/v1/availableitems", app.requireActivatedUser(app.createAvailableItemHandler))
-	router.HandlerFunc(http.MethodGet, "/v1/availableitems/:id", app.requireActivatedUser(app.showAvailableItemHandler))
-	router.HandlerFunc(http.MethodPatch, "/v1/availableitems/:id", app.requireActivatedUser(app.updateAvailableItemHandler))
-	router.HandlerFunc(http.MethodDelete, "/v1/availableitems/:id", app.requireActivatedUser(app.deleteAvailableItemHandler))
+	router.HandlerFunc(http.MethodGet, "/v1/availableitems", app.requirePermission("availableitems:read", app.listAvailableItemsHandler))
+	router.HandlerFunc(http.MethodPost, "/v1/availableitems", app.requirePermission("availableitems:write", app.createAvailableItemHandler))
+	router.HandlerFunc(http.MethodGet, "/v1/availableitems/:id", app.requirePermission("availableitems:read", app.showAvailableItemHandler))
+	router.HandlerFunc(http.MethodPatch, "/v1/availableitems/:id", app.requirePermission("availableitems:write", app.updateAvailableItemHandler))
+	router.HandlerFunc(http.MethodDelete, "/v1/availableitems/:id", app.requirePermission("availableitems:write", app.deleteAvailableItemHandler))
 
 	router.HandlerFunc(http.MethodPost, "/v1/users", app.registerUserHandler)
 
