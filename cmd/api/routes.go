@@ -1,10 +1,15 @@
 package main
 
 import (
+	"expvar"
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
 )
+
+/*
+	No endpoints should be exposed for public use, except get with a fixed number of requests
+*/
 
 func (app *application) routes() http.Handler {
 	router := httprouter.New()
@@ -26,5 +31,7 @@ func (app *application) routes() http.Handler {
 
 	router.HandlerFunc(http.MethodPost, "/v1/tokens/authentication", app.createAuthenticationTokenHandler)
 
-	return app.recoverPanic(app.enableCORS(app.rateLimit(app.authenticate(router))))
+	router.HandlerFunc(http.MethodGet, "/debug/vars", app.requirePermission("metrics:view", expvar.Handler().ServeHTTP))
+
+	return app.metrics(app.recoverPanic(app.enableCORS(app.rateLimit(app.authenticate(router)))))
 }

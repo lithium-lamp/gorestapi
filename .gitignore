@@ -3,3 +3,4 @@ Icon?
 .env
 commands.txt
 populate_database.sh
+vendor/

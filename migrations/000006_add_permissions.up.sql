@@ -12,4 +12,5 @@ CREATE TABLE IF NOT EXISTS users_permissions (
 INSERT INTO permissions (code)
 VALUES
     ('availableitems:read'),
-    ('availableitems:write');
+    ('availableitems:write'),
+    ('metrics:view');
