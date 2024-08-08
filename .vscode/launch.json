@@ -11,13 +11,25 @@
             "type": "node-terminal"
         },
         {
-            "command": "go run ./cmd/api -limiter-enabled=false",
+            "command": "go run ./cmd/api -limiter-enabled=false -cors-trusted-origins='http://localhost:9000'",
             "name": "start rest api (no limiter)",
             "request": "launch",
             "type": "node-terminal"
         },
         {
-            "command": "go run ./cmd/api/ -limiter-burst=2",
+            "command": "go run ./cmd/examples/cors/preflight",
+            "name": "start preflight front end example",
+            "request": "launch",
+            "type": "node-terminal"
+        },
+        {
+            "command": "go run ./cmd/examples/cors/simple",
+            "name": "start simple front end example",
+            "request": "launch",
+            "type": "node-terminal"
+        },
+        {
+            "command": "go run ./cmd/api/ -limiter-burst=2 -cors-trusted-origins='http://localhost:9000'",
             "name": "start rest api (burst 2 limiter)",
             "request": "launch",
             "type": "node-terminal"
