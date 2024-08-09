@@ -4,3 +4,4 @@ Icon?
 commands.txt
 populate_database.sh
 vendor/
+bin/

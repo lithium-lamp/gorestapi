@@ -14,18 +14,15 @@ const html = `
 	</head>
 	<body>
 		<h1>Preflight CORS</h1>
-		<div id="output"></div>
+		<code id="output"></code>
 		<script>
 			document.addEventListener('DOMContentLoaded', function() {
-				fetch("http://localhost:4000/v1/tokens/authentication", {
-					method: "POST",
+				fetch("http://localhost:4000" + window.location.pathname + window.location.search, {
+					method: "GET",
 					headers: {
-						'Content-Type': 'application/json'
-					},
-					body: JSON.stringify({
-						email: 'admin@admin.com',
-						password: 'pa55word'
-					})
+						'Content-Type': 'application/json',
+						'Authorization': 'Bearer ACTIVE-BEARER-TOKEN'
+					}
 				}).then(
 					function (response) {
 						response.text().then(function (text) {
