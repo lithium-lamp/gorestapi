@@ -2,6 +2,7 @@ Icon?
 ![iI]con[_a-zA-Z0-9]
 .env
 commands.txt
-populate_database.sh
+populate_database_availableitems.sh
+populate_database_itemtypes.sh
 vendor/
 bin/
