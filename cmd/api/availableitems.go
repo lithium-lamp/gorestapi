@@ -15,7 +15,7 @@ func (app *application) createAvailableItemHandler(w http.ResponseWriter, r *htt
 		ExpirationAt  time.Time        `json:"expiration_at"`
 		LongName      string           `json:"long_name"`
 		ShortName     string           `json:"short_name"`
-		ItemType      data.ItemType    `json:"item_type"`
+		ItemType      int64            `json:"item_type"`
 		Measurement   data.Measurement `json:"measurement"`
 		ContainerSize int32            `json:"container_size"`
 	}
@@ -103,7 +103,7 @@ func (app *application) updateAvailableItemHandler(w http.ResponseWriter, r *htt
 		ExpirationAt  *time.Time        `json:"expiration_at"`
 		LongName      *string           `json:"long_name"`
 		ShortName     *string           `json:"short_name"`
-		ItemType      *data.ItemType    `json:"item_type"`
+		ItemType      *int64            `json:"item_type"`
 		Measurement   *data.Measurement `json:"measurement"`
 		ContainerSize *int32            `json:"container_size"`
 	}
@@ -191,7 +191,7 @@ func (app *application) listAvailableItemsHandler(w http.ResponseWriter, r *http
 		ExpirationAt  time.Time
 		LongName      string
 		ShortName     string
-		ItemType      data.ItemType
+		ItemType      int
 		Measurement   data.Measurement
 		ContainerSize int
 		data.Filters
@@ -204,7 +204,7 @@ func (app *application) listAvailableItemsHandler(w http.ResponseWriter, r *http
 	input.ExpirationAt = app.readTime(qs, "expiration_at", time.Time{}, v)
 	input.LongName = app.readString(qs, "long_name", "")
 	input.ShortName = app.readString(qs, "short_name", "")
-	input.ItemType = data.ItemType(app.readInt(qs, "item_type", 0, v))
+	input.ItemType = app.readInt(qs, "item_type", 0, v)
 	input.Measurement = data.Measurement(app.readInt(qs, "measurement", 0, v))
 	input.ContainerSize = app.readInt(qs, "container_size", 0, v)
 

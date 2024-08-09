@@ -13,4 +13,6 @@ INSERT INTO permissions (code)
 VALUES
     ('availableitems:read'),
     ('availableitems:write'),
+    ('itemtypes:read'),
+    ('itemtypes:write'),
     ('metrics:view');
