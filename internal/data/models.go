@@ -12,6 +12,7 @@ var (
 
 type Models struct {
 	AvailableItems AvailableItemModel
+	ItemTypes      ItemTypeModel
 	Permissions    PermissionModel
 	Tokens         TokenModel
 	Users          UserModel
@@ -20,6 +21,7 @@ type Models struct {
 func NewModels(db *sql.DB) Models {
 	return Models{
 		AvailableItems: AvailableItemModel{DB: db},
+		ItemTypes:      ItemTypeModel{DB: db},
 		Permissions:    PermissionModel{DB: db},
 		Tokens:         TokenModel{DB: db},
 		Users:          UserModel{DB: db},

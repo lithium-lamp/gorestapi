@@ -25,6 +25,12 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodPatch, "/v1/availableitems/:id", app.requirePermission("availableitems:write", app.updateAvailableItemHandler))
 	router.HandlerFunc(http.MethodDelete, "/v1/availableitems/:id", app.requirePermission("availableitems:write", app.deleteAvailableItemHandler))
 
+	router.HandlerFunc(http.MethodGet, "/v1/itemtypes", app.requirePermission("itemtypes:read", app.listItemTypesHandler))
+	router.HandlerFunc(http.MethodPost, "/v1/itemtypes", app.requirePermission("itemtypes:write", app.createItemTypeHandler))
+	router.HandlerFunc(http.MethodGet, "/v1/itemtypes/:id", app.requirePermission("itemtypes:read", app.showItemTypeHandler))
+	router.HandlerFunc(http.MethodPatch, "/v1/itemtypes/:id", app.requirePermission("itemtypes:write", app.updateItemTypeHandler))
+	router.HandlerFunc(http.MethodDelete, "/v1/itemtypes/:id", app.requirePermission("itemtypes:write", app.deleteItemTypeHandler))
+
 	router.HandlerFunc(http.MethodPost, "/v1/users", app.registerUserHandler)
 
 	router.HandlerFunc(http.MethodPut, "/v1/users/activated", app.activateUserHandler)

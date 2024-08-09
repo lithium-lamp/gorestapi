@@ -69,7 +69,7 @@ func (ai AvailableItemModel) Get(id int64) (*AvailableItem, error) {
 	return &availableitem, nil
 }
 
-func (ai AvailableItemModel) GetAll(expirationat time.Time, longname string, shortname string, itemtype ItemType, measurement Measurement, containersize int, filters Filters) ([]*AvailableItem, Metadata, error) {
+func (ai AvailableItemModel) GetAll(expirationat time.Time, longname string, shortname string, itemtype int, measurement Measurement, containersize int, filters Filters) ([]*AvailableItem, Metadata, error) {
 	//expiration_at currently retrieves items larger than the input ====> search for items that are still fresh according to current date
 	query := fmt.Sprintf(`
 		SELECT count(*) OVER(), id, created_at, expiration_at, long_name, short_name, item_type, measurement, container_size, version
@@ -199,7 +199,7 @@ type AvailableItem struct {
 	ExpirationAt  time.Time   `json:"expiration_at,omitempty"`
 	LongName      string      `json:"long_name"`
 	ShortName     string      `json:"short_name"`
-	ItemType      ItemType    `json:"item_type"`
+	ItemType      int64       `json:"item_type"`
 	Measurement   Measurement `json:"measurement"`
 	ContainerSize int32       `json:"container_size"`
 	Version       int32       `json:"version"`

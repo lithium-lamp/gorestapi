@@ -1,5 +1,7 @@
 package data
 
+/*
+
 import (
 	"errors"
 	"fmt"
@@ -39,3 +41,4 @@ func (it *ItemType) UnmarshalJSON(jsonValue []byte) error {
 	*it = ItemType(i)
 	return nil
 }
+*/

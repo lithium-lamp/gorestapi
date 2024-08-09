@@ -14,19 +14,25 @@ const html = `
 	</head>
 	<body>
 		<h1>Preflight CORS</h1>
-		<code id="output"></code>
+		<a href="http://localhost:9000/v1/healthcheck">/v1/healthcheck</a> 
+		<a href="http://localhost:9000/v1/availableitems">/v1/availableitems</a> 
+		<a href="http://localhost:9000/v1/availableitems/1">/v1/availableitems/1</a> 
+		<a href="http://localhost:9000/v1/itemtypes">/v1/itemtypes</a> 
+		<a href="http://localhost:9000/v1/itemtypes/1">/v1/itemtypes/1</a> 
+		<a href="http://localhost:9000/debug/vars">/debug/vars</a> 
+		<pre id="json"></pre>
 		<script>
 			document.addEventListener('DOMContentLoaded', function() {
 				fetch("http://localhost:4000" + window.location.pathname + window.location.search, {
 					method: "GET",
 					headers: {
 						'Content-Type': 'application/json',
-						'Authorization': 'Bearer ACTIVE-BEARER-TOKEN'
+						'Authorization': 'Bearer PLACEHOLDER'
 					}
 				}).then(
 					function (response) {
 						response.text().then(function (text) {
-							document.getElementById("output").innerHTML = text;
+							document.getElementById("json").textContent = text;
 						});
 					},
 					function(err) {
