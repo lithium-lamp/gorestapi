@@ -4,5 +4,6 @@ Icon?
 commands.txt
 populate_database_availableitems.sh
 populate_database_itemtypes.sh
+populate_database_measurements.sh
 vendor/
 bin/

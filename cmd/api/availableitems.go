@@ -12,12 +12,12 @@ import (
 
 func (app *application) createAvailableItemHandler(w http.ResponseWriter, r *http.Request) {
 	var input struct {
-		ExpirationAt  time.Time        `json:"expiration_at"`
-		LongName      string           `json:"long_name"`
-		ShortName     string           `json:"short_name"`
-		ItemType      int64            `json:"item_type"`
-		Measurement   data.Measurement `json:"measurement"`
-		ContainerSize int32            `json:"container_size"`
+		ExpirationAt  time.Time `json:"expiration_at"`
+		LongName      string    `json:"long_name"`
+		ShortName     string    `json:"short_name"`
+		ItemType      int64     `json:"item_type"`
+		Measurement   int64     `json:"measurement"`
+		ContainerSize int32     `json:"container_size"`
 	}
 
 	err := app.readJSON(w, r, &input)
@@ -100,12 +100,12 @@ func (app *application) updateAvailableItemHandler(w http.ResponseWriter, r *htt
 	}
 
 	var input struct {
-		ExpirationAt  *time.Time        `json:"expiration_at"`
-		LongName      *string           `json:"long_name"`
-		ShortName     *string           `json:"short_name"`
-		ItemType      *int64            `json:"item_type"`
-		Measurement   *data.Measurement `json:"measurement"`
-		ContainerSize *int32            `json:"container_size"`
+		ExpirationAt  *time.Time `json:"expiration_at"`
+		LongName      *string    `json:"long_name"`
+		ShortName     *string    `json:"short_name"`
+		ItemType      *int64     `json:"item_type"`
+		Measurement   *int64     `json:"measurement"`
+		ContainerSize *int32     `json:"container_size"`
 	}
 
 	err = app.readJSON(w, r, &input)
@@ -192,7 +192,7 @@ func (app *application) listAvailableItemsHandler(w http.ResponseWriter, r *http
 		LongName      string
 		ShortName     string
 		ItemType      int
-		Measurement   data.Measurement
+		Measurement   int
 		ContainerSize int
 		data.Filters
 	}
@@ -205,7 +205,7 @@ func (app *application) listAvailableItemsHandler(w http.ResponseWriter, r *http
 	input.LongName = app.readString(qs, "long_name", "")
 	input.ShortName = app.readString(qs, "short_name", "")
 	input.ItemType = app.readInt(qs, "item_type", 0, v)
-	input.Measurement = data.Measurement(app.readInt(qs, "measurement", 0, v))
+	input.Measurement = app.readInt(qs, "measurement", 0, v)
 	input.ContainerSize = app.readInt(qs, "container_size", 0, v)
 
 	input.Filters.Page = app.readInt(qs, "page", 1, v)

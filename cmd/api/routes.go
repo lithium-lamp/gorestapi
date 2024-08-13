@@ -31,6 +31,12 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodPatch, "/v1/itemtypes/:id", app.requirePermission("itemtypes:write", app.updateItemTypeHandler))
 	router.HandlerFunc(http.MethodDelete, "/v1/itemtypes/:id", app.requirePermission("itemtypes:write", app.deleteItemTypeHandler))
 
+	router.HandlerFunc(http.MethodGet, "/v1/measurements", app.requirePermission("measurements:read", app.listMeasurementsHandler))
+	router.HandlerFunc(http.MethodPost, "/v1/measurements", app.requirePermission("measurements:write", app.createMeasurementHandler))
+	router.HandlerFunc(http.MethodGet, "/v1/measurements/:id", app.requirePermission("measurements:read", app.showMeasurementHandler))
+	router.HandlerFunc(http.MethodPatch, "/v1/measurements/:id", app.requirePermission("measurements:write", app.updateMeasurementHandler))
+	router.HandlerFunc(http.MethodDelete, "/v1/measurements/:id", app.requirePermission("measurements:write", app.deleteMeasurementHandler))
+
 	router.HandlerFunc(http.MethodPost, "/v1/users", app.registerUserHandler)
 
 	router.HandlerFunc(http.MethodPut, "/v1/users/activated", app.activateUserHandler)

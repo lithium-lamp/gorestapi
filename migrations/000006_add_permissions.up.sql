@@ -15,4 +15,6 @@ VALUES
     ('availableitems:write'),
     ('itemtypes:read'),
     ('itemtypes:write'),
+    ('measurements:read'),
+    ('measurements:write'),
     ('metrics:view');
