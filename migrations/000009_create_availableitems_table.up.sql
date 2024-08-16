@@ -4,8 +4,8 @@ CREATE TABLE IF NOT EXISTS availableitems (
     expiration_at timestamp(0) with time zone NOT NULL DEFAULT NOW(),
     long_name text NOT NULL,
     short_name text NOT NULL,
-    item_type int NOT NULL,
-    measurement int NOT NULL,
+    item_type bigserial references itemtypes(id) NOT NULL,
+    measurement bigserial references measurements(id) NOT NULL,
     container_size int NOT NULL,
     version integer NOT NULL DEFAULT 1
 );
