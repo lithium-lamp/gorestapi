@@ -1,0 +1,38 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "command": "make db/start",
+            "name": "compose up and enter postgres shell",
+            "request": "launch",
+            "type": "node-terminal"
+        },
+        {
+            "command": "make run/api",
+            "name": "start rest api (no limiter)",
+            "request": "launch",
+            "type": "node-terminal"
+        },
+        {
+            "command": "go run ./cmd/examples/cors/preflight",
+            "name": "start preflight front end example",
+            "request": "launch",
+            "type": "node-terminal"
+        },
+        {
+            "command": "go run ./cmd/examples/cors/simple",
+            "name": "start simple front end example",
+            "request": "launch",
+            "type": "node-terminal"
+        },
+        {
+            "command": "go run ./cmd/api/ -limiter-burst=2 -cors-trusted-origins='http://localhost:9000'",
+            "name": "start rest api (burst 2 limiter)",
+            "request": "launch",
+            "type": "node-terminal"
+        },
+    ]
+}

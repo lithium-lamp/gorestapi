@@ -1,0 +1,63 @@
+services:
+  #restapi:
+  #  build: .
+  #  depends_on:
+  #    db:
+  #      condition: service_healthy
+  #      restart: true
+  #  ports:
+  #    - "8000:4000"
+  #  networks:
+  #    proxy_net:
+  #    backend_net:
+  #      ipv4_address: ${RESTAPI_HOST}
+  db:
+    container_name: postgres_container # additionally, citext is installed
+    image: postgres
+    restart: always
+    ports:
+      - "6543:5432"
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - householdingvolume:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_NAME}"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+    #networks:
+    #  backend_net:
+    #    ipv4_address: ${DB_HOST}
+  pgadmin:
+    container_name: pgadmin4_container
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadminvolume:/var/lib/pgadmin
+    depends_on:
+    - db
+    #networks:
+    #  backend_net:
+    #    ipv4_address: ${PGADMIN_HOST}
+
+#networks:
+  #proxy_net:
+  #  external: true
+  #backend_net:
+  #  ipam:
+  #    driver: default
+  #    config:
+  #      - subnet: "172.16.238.0/24"
+
+volumes:
+  householdingvolume:
+  pgadminvolume:
