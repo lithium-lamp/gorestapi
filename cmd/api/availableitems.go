@@ -12,11 +12,8 @@ import (
 
 func (app *application) createAvailableItemHandler(w http.ResponseWriter, r *http.Request) {
 	var input struct {
+		KnownItemsID  int64     `json:"knownitems_id"`
 		ExpirationAt  time.Time `json:"expiration_at"`
-		LongName      string    `json:"long_name"`
-		ShortName     string    `json:"short_name"`
-		ItemType      int64     `json:"item_type"`
-		Measurement   int64     `json:"measurement"`
 		ContainerSize int32     `json:"container_size"`
 	}
 
@@ -27,11 +24,8 @@ func (app *application) createAvailableItemHandler(w http.ResponseWriter, r *htt
 	}
 
 	availableitem := &data.AvailableItem{
+		KnownItemsID:  input.KnownItemsID,
 		ExpirationAt:  input.ExpirationAt,
-		LongName:      input.LongName,
-		ShortName:     input.ShortName,
-		ItemType:      input.ItemType,
-		Measurement:   input.Measurement,
 		ContainerSize: input.ContainerSize,
 	}
 
@@ -100,11 +94,8 @@ func (app *application) updateAvailableItemHandler(w http.ResponseWriter, r *htt
 	}
 
 	var input struct {
+		KnownItemsID  *int64     `json:"knownitems_id"`
 		ExpirationAt  *time.Time `json:"expiration_at"`
-		LongName      *string    `json:"long_name"`
-		ShortName     *string    `json:"short_name"`
-		ItemType      *int64     `json:"item_type"`
-		Measurement   *int64     `json:"measurement"`
 		ContainerSize *int32     `json:"container_size"`
 	}
 
@@ -114,24 +105,12 @@ func (app *application) updateAvailableItemHandler(w http.ResponseWriter, r *htt
 		return
 	}
 
+	if input.KnownItemsID != nil {
+		availableitem.KnownItemsID = *input.KnownItemsID
+	}
+
 	if input.ExpirationAt != nil {
 		availableitem.ExpirationAt = *input.ExpirationAt
-	}
-
-	if input.LongName != nil {
-		availableitem.LongName = *input.LongName
-	}
-
-	if input.ShortName != nil {
-		availableitem.ShortName = *input.ShortName
-	}
-
-	if input.ItemType != nil {
-		availableitem.ItemType = *input.ItemType
-	}
-
-	if input.Measurement != nil {
-		availableitem.Measurement = *input.Measurement
 	}
 
 	if input.ContainerSize != nil {
@@ -188,11 +167,8 @@ func (app *application) deleteAvailableItemHandler(w http.ResponseWriter, r *htt
 
 func (app *application) listAvailableItemsHandler(w http.ResponseWriter, r *http.Request) {
 	var input struct {
+		KnownItemsID  int
 		ExpirationAt  time.Time
-		LongName      string
-		ShortName     string
-		ItemType      int
-		Measurement   int
 		ContainerSize int
 		data.Filters
 	}
@@ -201,11 +177,10 @@ func (app *application) listAvailableItemsHandler(w http.ResponseWriter, r *http
 
 	qs := r.URL.Query()
 
+	input.KnownItemsID = app.readInt(qs, "knownitems_id", 0, v)
+
 	input.ExpirationAt = app.readTime(qs, "expiration_at", time.Time{}, v)
-	input.LongName = app.readString(qs, "long_name", "")
-	input.ShortName = app.readString(qs, "short_name", "")
-	input.ItemType = app.readInt(qs, "item_type", 0, v)
-	input.Measurement = app.readInt(qs, "measurement", 0, v)
+
 	input.ContainerSize = app.readInt(qs, "container_size", 0, v)
 
 	input.Filters.Page = app.readInt(qs, "page", 1, v)
@@ -213,14 +188,14 @@ func (app *application) listAvailableItemsHandler(w http.ResponseWriter, r *http
 
 	input.Filters.Sort = app.readString(qs, "sort", "id")
 
-	input.Filters.SortSafelist = []string{"id", "expiration_at", "long_name", "short_name", "item_type", "measurement", "container_size", "-id", "-expiration_at", "-long_name", "-short_name", "-item_type", "-measurement", "-container_size"}
+	input.Filters.SortSafelist = []string{"id", "knownitems_id", "expiration_at", "container_size", "-id", "-knownitems_id", "-expiration_at", "-container_size"}
 
 	if data.ValidateFilters(v, input.Filters); !v.Valid() {
 		app.failedValidationResponse(w, r, v.Errors)
 		return
 	}
 
-	availableitems, metadata, err := app.models.AvailableItems.GetAll(input.ExpirationAt, input.LongName, input.ShortName, input.ItemType, input.Measurement, input.ContainerSize, input.Filters)
+	availableitems, metadata, err := app.models.AvailableItems.GetAll(input.KnownItemsID, input.ExpirationAt, input.ContainerSize, input.Filters)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return

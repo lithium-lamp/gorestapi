@@ -29,6 +29,8 @@ func main() {
 		<a href="http://localhost:9000/v1/healthcheck">/v1/healthcheck</a><br>
 		<a href="http://localhost:9000/v1/availableitems">/v1/availableitems</a><br>
 		<a href="http://localhost:9000/v1/availableitems/1">/v1/availableitems/1</a><br>
+		<a href="http://localhost:9000/v1/knownitems">/v1/knownitems</a><br>
+		<a href="http://localhost:9000/v1/knownitems/1">/v1/knownitems/1</a><br>
 		<a href="http://localhost:9000/v1/itemtypes">/v1/itemtypes</a><br>
 		<a href="http://localhost:9000/v1/itemtypes/1">/v1/itemtypes/1</a><br>
 		<a href="http://localhost:9000/v1/measurements">/v1/measurements</a><br>

@@ -82,3 +82,37 @@ build/api:
 	@echo 'Building cmd/api...'
 	go build -ldflags=${linker_flags} -o=./bin/api ./cmd/api
 	GOOS=linux GOARCH=amd64 go build -ldflags=${linker_flags} -o=./bin/linux_amd64/api ./cmd/api
+
+# ==================================================================================== #
+# POPULATING DATABASE WITH SAMPLE DATA
+# ==================================================================================== #
+
+## pop/createadmin: create an admin user
+.PHONY: pop/createadmin
+pop/createadmin:
+	"./shell scripts/populate database/populate_database_createadmin.sh"
+
+## pop/getadmintoken: get token from admin user
+.PHONY: pop/getadmintoken
+pop/getadmintoken:
+	"./shell scripts/populate database/populate_database_getadmintoken.sh"
+
+## pop/itemtypes: create some itemtypes
+.PHONY: pop/itemtypes
+pop/itemtypes:
+	"./shell scripts/populate database/populate_database_itemtypes.sh"
+
+## pop/measurements: create some measurements
+.PHONY: pop/measurements
+pop/measurements:
+	"./shell scripts/populate database/populate_database_measurements.sh"
+
+## pop/knownitems: create some known items
+.PHONY: pop/knownitems
+pop/knownitems:
+	"./shell scripts/populate database/populate_database_knownitems.sh"
+
+## pop/availableitems: create some available items
+.PHONY: pop/availableitems
+pop/availableitems:
+	"./shell scripts/populate database/populate_database_availableitems.sh"

@@ -51,17 +51,12 @@ func (app *application) routes() http.Handler {
 }
 
 /*
+   ('recipeingredients:read'),
+   ('recipeingredients:write'),
 
-	('knownitems:read'),
-    ('knownitems:write'),
+   ('ingredients:read'),
+   ('ingredients:write'),
 
-    ('recipeingredients:read'),
-    ('recipeingredients:write'),
-
-    ('ingredients:read'),
-    ('ingredients:write'),
-
-    ('recipies:read'),
-    ('recipies:write'),
-
+   ('recipies:read'),
+   ('recipies:write'),
 */
