@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS knownitems_tags_idx ON knownitems USING GIN (tags);

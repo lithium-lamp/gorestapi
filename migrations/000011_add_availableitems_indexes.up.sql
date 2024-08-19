@@ -1,2 +1,0 @@
-CREATE INDEX IF NOT EXISTS availableitems_long_name_idx ON availableitems USING GIN (to_tsvector('simple', long_name));
-CREATE INDEX IF NOT EXISTS availableitems_short_name_idx ON availableitems USING GIN (to_tsvector('simple', short_name));

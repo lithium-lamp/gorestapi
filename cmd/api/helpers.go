@@ -110,7 +110,6 @@ func (app *application) readString(qs url.Values, key string, defaultValue strin
 	return s
 }
 
-/*
 func (app *application) readCSV(qs url.Values, key string, defaultValue []string) []string {
 	csv := qs.Get(key)
 
@@ -120,7 +119,6 @@ func (app *application) readCSV(qs url.Values, key string, defaultValue []string
 
 	return strings.Split(csv, ",")
 }
-*/
 
 func (app *application) readInt(qs url.Values, key string, defaultValue int, v *validator.Validator) int { // Extract the value from the query string.
 	s := qs.Get(key)

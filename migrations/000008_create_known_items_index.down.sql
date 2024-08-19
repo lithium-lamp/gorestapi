@@ -1,0 +1,1 @@
+DROP INDEX IF EXISTS knownitems_tags_idx;
