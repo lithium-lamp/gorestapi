@@ -14,6 +14,7 @@ create table IF NOT EXISTS ingredients (
   id bigserial PRIMARY KEY,
   created_at timestamp(0) with time zone NOT NULL DEFAULT NOW(),
   name text NOT NULL,
+  tags text [] NOT NULL DEFAULT '{}',
   version integer NOT NULL DEFAULT 1
 );
 

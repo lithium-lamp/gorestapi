@@ -8,5 +8,6 @@ CREATE TABLE IF NOT EXISTS knownitems (
     item_type bigint REFERENCES itemtypes(id) NOT NULL,
     measurement bigint REFERENCES measurements(id) NOT NULL,
     container_size int NOT NULL,
-    version integer NOT NULL DEFAULT 1
+    version integer NOT NULL DEFAULT 1,
+    UNIQUE (serial_number, long_name)
 );

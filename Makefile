@@ -116,3 +116,18 @@ pop/knownitems:
 .PHONY: pop/availableitems
 pop/availableitems:
 	"./shell scripts/populate database/populate_database_availableitems.sh"
+
+## pop/ingredients: create some ingredients
+.PHONY: pop/ingredients
+pop/ingredients:
+	"./shell scripts/populate database/populate_database_ingredients.sh"
+
+## pop/recipies: create some recipies
+.PHONY: pop/recipies
+pop/recipies:
+	"./shell scripts/populate database/populate_database_recipies.sh"
+
+## pop/recipeingredients: create some recipeingredients
+.PHONY: pop/recipeingredients
+pop/recipeingredients:
+	"./shell scripts/populate database/populate_database_recipeingredients.sh"

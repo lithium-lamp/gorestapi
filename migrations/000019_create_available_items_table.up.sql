@@ -6,7 +6,3 @@ CREATE TABLE IF NOT EXISTS availableitems (
     container_size int NOT NULL,
     version integer NOT NULL DEFAULT 1
 );
-
- /*
-    expiration_at can be null possibly
- */

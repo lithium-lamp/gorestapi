@@ -17,6 +17,8 @@ VALUES
     ('itemtypes:write'),
     ('measurements:read'),
     ('measurements:write'),
+    ('tags:read'),
+    ('tags:write'),
     ('knownitems:read'),
     ('knownitems:write'),
     ('recipeingredients:read'),
