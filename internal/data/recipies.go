@@ -69,21 +69,23 @@ func (rm RecipeModel) Get(id int64) (*Recipe, error) {
 	return &recipe, nil
 }
 
-func (rm RecipeModel) GetAll(name string, cooktimeminutes int, portions int, tags []string, filters Filters) ([]*Recipe, Metadata, error) {
+func (rm RecipeModel) GetAll(name string, description string, cookingsteps []string, cooktimeminutes int, portions int, tags []string, filters Filters) ([]*Recipe, Metadata, error) {
 	query := fmt.Sprintf(`
 		SELECT count(*) OVER(), id, created_at, name, description, cooking_steps, cook_time_minutes, portions, tags, version
 		FROM recipies
 		WHERE (to_tsvector('simple', name) @@ plainto_tsquery('simple', $1) OR $1 = '')
-		AND (cook_time_minutes = $2 OR $2 = 0)
-		AND (portions = $3 OR $3 = 0)
-		AND (tags @> $4 OR $4 = '{}')
+		AND (description = $2 OR $2 = '')
+		AND (cooking_steps @> $3 OR $3 = '{}')
+		AND (cook_time_minutes = $4 OR $4 = 0)
+		AND (portions = $5 OR $5 = 0)
+		AND (tags @> $6 OR $6 = '{}')
 		ORDER BY %s %s, id ASC
-		LIMIT $5 OFFSET $6`, filters.sortColumn(), filters.sortDirection())
+		LIMIT $7 OFFSET $8`, filters.sortColumn(), filters.sortDirection())
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	args := []interface{}{name, cooktimeminutes, portions, pq.Array(tags), filters.limit(), filters.offset()}
+	args := []interface{}{name, description, pq.Array(cookingsteps), cooktimeminutes, portions, pq.Array(tags), filters.limit(), filters.offset()}
 
 	rows, err := rm.DB.QueryContext(ctx, query, args...)
 	if err != nil {
@@ -103,6 +105,8 @@ func (rm RecipeModel) GetAll(name string, cooktimeminutes int, portions int, tag
 			&recipe.ID,
 			&recipe.CreatedAt,
 			&recipe.Name,
+			&recipe.Description,
+			pq.Array(&recipe.CookingSteps),
 			&recipe.CookTimeMinutes,
 			&recipe.Portions,
 			pq.Array(&recipe.Tags),

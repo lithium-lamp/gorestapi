@@ -188,6 +188,8 @@ func (app *application) deleteRecipeHandler(w http.ResponseWriter, r *http.Reque
 func (app *application) listRecipiesHandler(w http.ResponseWriter, r *http.Request) {
 	var input struct {
 		Name            string
+		Description     string
+		CookingSteps    []string
 		CookTimeMinutes int
 		Portions        int
 		Tags            []string
@@ -199,6 +201,8 @@ func (app *application) listRecipiesHandler(w http.ResponseWriter, r *http.Reque
 	qs := r.URL.Query()
 
 	input.Name = app.readString(qs, "name", "")
+	input.Description = app.readString(qs, "description", "")
+	input.CookingSteps = app.readCSV(qs, "cooking_steps", []string{})
 	input.CookTimeMinutes = app.readInt(qs, "cook_time_minutes", 0, v)
 	input.Portions = app.readInt(qs, "portions", 0, v)
 	input.Tags = app.readCSV(qs, "tags", []string{})
@@ -208,14 +212,14 @@ func (app *application) listRecipiesHandler(w http.ResponseWriter, r *http.Reque
 
 	input.Filters.Sort = app.readString(qs, "sort", "id")
 
-	input.Filters.SortSafelist = []string{"id", "name", "cook_time_minutes", "portions", "tags", "-id", "-name", "-cook_time_minutes", "-portions", "-tags"}
+	input.Filters.SortSafelist = []string{"id", "name", "description", "cook_time_minutes", "portions", "-id", "-name", "-description", "-cook_time_minutes", "-portions"}
 
 	if data.ValidateFilters(v, input.Filters); !v.Valid() {
 		app.failedValidationResponse(w, r, v.Errors)
 		return
 	}
 
-	recipies, metadata, err := app.models.Recipies.GetAll(input.Name, input.CookTimeMinutes, input.Portions, input.Tags, input.Filters)
+	recipies, metadata, err := app.models.Recipies.GetAll(input.Name, input.Description, input.CookingSteps, input.CookTimeMinutes, input.Portions, input.Tags, input.Filters)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
