@@ -4,3 +4,5 @@ Icon?
 shell scripts/
 vendor/
 bin/
+migrations/000800_TEST_create_superuser.down.sql
+migrations/000800_TEST_create_superuser.up.sql
