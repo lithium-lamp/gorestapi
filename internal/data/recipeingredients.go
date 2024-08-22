@@ -45,7 +45,7 @@ func (rm RecipeIngredientModel) Get(recipeid int64, ingredientid int64) (*Recipe
 
 	var recipeingredient RecipeIngredient
 
-	args := []interface{}{recipeingredient.RecipeID, recipeingredient.IngredientID}
+	args := []interface{}{recipeid, ingredientid}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -124,7 +124,7 @@ func (rm RecipeIngredientModel) GetAll(amount int, measurement int, filters Filt
 	return recipeingredients, metadata, nil
 }
 
-func (mm RecipeIngredientModel) Update(recipeingredient *RecipeIngredient) error {
+func (mm RecipeIngredientModel) Update(recipeingredient *RecipeIngredient, oldrecipeid *int64, oldingredientid *int64) error {
 	query := `
 		UPDATE recipe_ingredients
 		SET recipe_id = $1, ingredient_id = $2, amount = $3, measurement = $4, version = version + 1
@@ -136,8 +136,8 @@ func (mm RecipeIngredientModel) Update(recipeingredient *RecipeIngredient) error
 		recipeingredient.IngredientID,
 		recipeingredient.Amount,
 		recipeingredient.Measurement,
-		recipeingredient.RecipeID,
-		recipeingredient.IngredientID,
+		oldrecipeid,
+		oldingredientid,
 		recipeingredient.Version,
 	}
 
@@ -168,7 +168,7 @@ func (rm RecipeIngredientModel) Delete(recipeid int64, ingredientid int64) error
 
 	query := `
 		DELETE FROM recipe_ingredients
-		WHERE recipe_id = $1 AND ingredients_id = $2`
+		WHERE recipe_id = $1 AND ingredient_id = $2`
 
 	args := []interface{}{recipeid, ingredientid}
 

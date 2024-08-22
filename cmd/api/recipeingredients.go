@@ -130,7 +130,7 @@ func (app *application) updateRecipeIngredientHandler(w http.ResponseWriter, r *
 		return
 	}
 
-	err = app.models.RecipeIngredients.Update(recipeingredient)
+	err = app.models.RecipeIngredients.Update(recipeingredient, &recipeid, &ingredientid)
 	if err != nil {
 		switch {
 		case errors.Is(err, data.ErrEditConflict):
