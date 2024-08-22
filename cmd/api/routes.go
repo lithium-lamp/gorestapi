@@ -7,10 +7,6 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-/*
-	No endpoints should be exposed for public use, except get with a fixed number of requests
-*/
-
 func (app *application) routes() http.Handler {
 	router := httprouter.New()
 
@@ -19,11 +15,35 @@ func (app *application) routes() http.Handler {
 
 	router.HandlerFunc(http.MethodGet, "/v1/healthcheck", app.healthcheckHandler)
 
+	router.HandlerFunc(http.MethodGet, "/v1/recipies", app.requirePermission("recipies:read", app.listRecipiesHandler))
+	router.HandlerFunc(http.MethodPost, "/v1/recipies", app.requirePermission("recipies:write", app.createRecipeHandler))
+	router.HandlerFunc(http.MethodGet, "/v1/recipies/:id", app.requirePermission("recipies:read", app.showRecipeHandler))
+	router.HandlerFunc(http.MethodPatch, "/v1/recipies/:id", app.requirePermission("recipies:write", app.updateRecipeHandler))
+	router.HandlerFunc(http.MethodDelete, "/v1/recipies/:id", app.requirePermission("recipies:write", app.deleteRecipeHandler))
+
+	router.HandlerFunc(http.MethodGet, "/v1/ingredients", app.requirePermission("ingredients:read", app.listIngredientsHandler))
+	router.HandlerFunc(http.MethodPost, "/v1/ingredients", app.requirePermission("ingredients:write", app.createIngredientHandler))
+	router.HandlerFunc(http.MethodGet, "/v1/ingredients/:id", app.requirePermission("ingredients:read", app.showIngredientHandler))
+	router.HandlerFunc(http.MethodPatch, "/v1/ingredients/:id", app.requirePermission("ingredients:write", app.updateIngredientHandler))
+	router.HandlerFunc(http.MethodDelete, "/v1/ingredients/:id", app.requirePermission("ingredients:write", app.deleteIngredientHandler))
+
+	router.HandlerFunc(http.MethodGet, "/v1/recipeingredients", app.requirePermission("recipeingredients:read", app.listRecipeIngredientsHandler))
+	router.HandlerFunc(http.MethodPost, "/v1/recipeingredients", app.requirePermission("recipeingredients:write", app.createRecipeIngredientHandler))
+	router.HandlerFunc(http.MethodGet, "/v1/recipeingredients/:recipe_id/:ingredient_id", app.requirePermission("recipeingredients:read", app.showRecipeIngredientHandler))
+	router.HandlerFunc(http.MethodPatch, "/v1/recipeingredients/:recipe_id/:ingredient_id", app.requirePermission("recipeingredients:write", app.updateRecipeIngredientHandler))
+	router.HandlerFunc(http.MethodDelete, "/v1/recipeingredients/:recipe_id/:ingredient_id", app.requirePermission("recipeingredients:write", app.deleteRecipeIngredientHandler))
+
 	router.HandlerFunc(http.MethodGet, "/v1/availableitems", app.requirePermission("availableitems:read", app.listAvailableItemsHandler))
 	router.HandlerFunc(http.MethodPost, "/v1/availableitems", app.requirePermission("availableitems:write", app.createAvailableItemHandler))
 	router.HandlerFunc(http.MethodGet, "/v1/availableitems/:id", app.requirePermission("availableitems:read", app.showAvailableItemHandler))
 	router.HandlerFunc(http.MethodPatch, "/v1/availableitems/:id", app.requirePermission("availableitems:write", app.updateAvailableItemHandler))
 	router.HandlerFunc(http.MethodDelete, "/v1/availableitems/:id", app.requirePermission("availableitems:write", app.deleteAvailableItemHandler))
+
+	router.HandlerFunc(http.MethodGet, "/v1/knownitems", app.requirePermission("knownitems:read", app.listKnownItemsHandler))
+	router.HandlerFunc(http.MethodPost, "/v1/knownitems", app.requirePermission("knownitems:write", app.createKnownItemHandler))
+	router.HandlerFunc(http.MethodGet, "/v1/knownitems/:id", app.requirePermission("knownitems:read", app.showKnownItemHandler))
+	router.HandlerFunc(http.MethodPatch, "/v1/knownitems/:id", app.requirePermission("knownitems:write", app.updateKnownItemHandler))
+	router.HandlerFunc(http.MethodDelete, "/v1/knownitems/:id", app.requirePermission("knownitems:write", app.deleteKnownItemHandler))
 
 	router.HandlerFunc(http.MethodGet, "/v1/itemtypes", app.requirePermission("itemtypes:read", app.listItemTypesHandler))
 	router.HandlerFunc(http.MethodPost, "/v1/itemtypes", app.requirePermission("itemtypes:write", app.createItemTypeHandler))
@@ -36,6 +56,12 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodGet, "/v1/measurements/:id", app.requirePermission("measurements:read", app.showMeasurementHandler))
 	router.HandlerFunc(http.MethodPatch, "/v1/measurements/:id", app.requirePermission("measurements:write", app.updateMeasurementHandler))
 	router.HandlerFunc(http.MethodDelete, "/v1/measurements/:id", app.requirePermission("measurements:write", app.deleteMeasurementHandler))
+
+	router.HandlerFunc(http.MethodGet, "/v1/tags", app.requirePermission("tags:read", app.listTagsHandler))
+	router.HandlerFunc(http.MethodPost, "/v1/tags", app.requirePermission("tags:write", app.createTagHandler))
+	router.HandlerFunc(http.MethodGet, "/v1/tags/:id", app.requirePermission("tags:read", app.showTagHandler))
+	router.HandlerFunc(http.MethodPatch, "/v1/tags/:id", app.requirePermission("tags:write", app.updateTagHandler))
+	router.HandlerFunc(http.MethodDelete, "/v1/tags/:id", app.requirePermission("tags:write", app.deleteTagHandler))
 
 	router.HandlerFunc(http.MethodPost, "/v1/users", app.registerUserHandler)
 

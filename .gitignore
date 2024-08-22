@@ -1,6 +1,8 @@
 Icon?
 ![iI]con[_a-zA-Z0-9]
 .env
-shell scripts/
+shell scripts/populate database/config.sh
 vendor/
 bin/
+migrations/000800_TEST_create_superuser.down.sql
+migrations/000800_TEST_create_superuser.up.sql
