@@ -29,6 +29,22 @@ func (app *application) readIDParam(r *http.Request) (int64, error) {
 	return id, nil
 }
 
+func (app *application) readRecipeIngredientIDsParam(r *http.Request) (int64, int64, error) {
+	params := httprouter.ParamsFromContext(r.Context())
+
+	recipeid, err := strconv.ParseInt(params.ByName("recipe_id"), 10, 64)
+	if err != nil || recipeid < 1 {
+		return 0, 0, errors.New("invalid recipe id parameter")
+	}
+
+	ingredientid, err := strconv.ParseInt(params.ByName("ingredient_id"), 10, 64)
+	if err != nil || ingredientid < 1 {
+		return 0, 0, errors.New("invalid ingredient id parameter")
+	}
+
+	return recipeid, ingredientid, nil
+}
+
 func (app *application) writeJSON(w http.ResponseWriter, status int, data envelope, headers http.Header) error {
 	js, err := json.MarshalIndent(data, "", "\t")
 	if err != nil {
@@ -110,7 +126,6 @@ func (app *application) readString(qs url.Values, key string, defaultValue strin
 	return s
 }
 
-/*
 func (app *application) readCSV(qs url.Values, key string, defaultValue []string) []string {
 	csv := qs.Get(key)
 
@@ -120,7 +135,6 @@ func (app *application) readCSV(qs url.Values, key string, defaultValue []string
 
 	return strings.Split(csv, ",")
 }
-*/
 
 func (app *application) readInt(qs url.Values, key string, defaultValue int, v *validator.Validator) int { // Extract the value from the query string.
 	s := qs.Get(key)
